@@ -4,3 +4,8 @@ This project aims to scrape data from National Institute of Korean History(http:
 In particular, we collect text data from http://db.history.go.kr/ which were already digitised there. 
 
 If you make use of this, feel free to use and don't forget to cite this github site. 
+
+There are a little bit dependencies. 
+- webdriver
+- sql database
+
