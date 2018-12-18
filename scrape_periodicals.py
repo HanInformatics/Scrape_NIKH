@@ -1,5 +1,5 @@
 #coding: utf-8
-#2018.10
+#2018.10, jek.cl.nlp@gmail.com
 
 import requests
 import dataset
