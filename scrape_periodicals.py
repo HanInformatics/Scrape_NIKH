@@ -7,6 +7,19 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+def get_periodical_list(meta_url, tablename):
+    r = requests.get(meta_url)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    p_lis = soup.find('tbody').find_all('tr')
+    for p in p_lis:
+        atts = p.find_all('td')
+        title = atts[0].get_text(strip=True)
+        p_date = atts[1].get_text(strip=True)
+        url_xx = p.find(class_='c_pitb ellip').find('a').get('href')
+        url_id = url_xx.split(',')[1].strip().strip("'")
+        a_record = {'top_id':url_id, 'title':title, 'p_date':p_date}
+        db[tablename].upsert(a_record, ['top_id'])
+    return len(p_lis)
 
 def scrape_vids(req_id, tablename):
     #db.query("drop table %s" %(tablename))
@@ -117,7 +130,18 @@ def do_a_periodical(top_id):
 
 if __name__ == "__main__":
 
-    db = dataset.connect('sqlite:///data/mperiodicals.db')
+    import os
+    ddir ='data'
+    if not os.path.exists(ddir): os.mkdir(ddir)
+    db = dataset.connect('sqlite:///%s/mperiodicals.db' %ddir)
+    meta_url ='http://db.history.go.kr/item/level.do?itemId=ma'
+
+    try:
+        get_periodical_list(meta_url, 'top_meta')
+    except Exception as e:
+        print(e)
+    exit()
+
     base_url = 'http://db.history.go.kr/id/'
     for i in range(1,96):
         top_id = format(i, '03d')
@@ -125,5 +149,4 @@ if __name__ == "__main__":
             do_a_periodical('ma_%s' %top_id)
         except Exception as e:
             print(e)
-        #print('ma_%s' %top_id)
-
+        print('ma_%s' %top_id)
