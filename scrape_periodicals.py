@@ -140,7 +140,6 @@ if __name__ == "__main__":
         get_periodical_list(meta_url, 'top_meta')
     except Exception as e:
         print(e)
-    exit()
 
     base_url = 'http://db.history.go.kr/id/'
     for i in range(1,96):
