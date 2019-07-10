@@ -51,10 +51,13 @@ def scrape_vids(req_id, tablename):
     browser.get(base_url+req_id)
 
     # if only there is more(전체보기)
-    folder = browser.find_element_by_class_name('btnWline')
-    if folder :
-        folder.click() # unfold
-        time.sleep(2)
+    try:
+        folder = browser.find_element_by_class_name('btnWline')
+        if folder :
+            folder.click() # unfold
+            time.sleep(2)
+    except Exception as e:
+        print(e)
 
     lis = browser.find_elements_by_class_name('dl_liCont')
     for item in lis:
@@ -70,10 +73,13 @@ def scrape_vids(req_id, tablename):
 def scrape_mids(top_id, tablename):
     top_url = base_url + top_id
     browser.get(top_url)
-    folder = browser.find_element_by_class_name('btnWline')
-    if folder:
-        folder.click()
-        time.sleep(3)
+    try:
+        folder = browser.find_element_by_class_name('btnWline')
+        if folder:
+            folder.click()
+            time.sleep(3)
+    except Exception as e:
+        print(e)
 
     ids_title = []
     lis = browser.find_elements_by_class_name('dl_liCont')
@@ -116,21 +122,22 @@ def scrape_article(base_url, article_id, article_table):
     body_soup = soup.find_all('div', attrs={'style':'margin-left:20px;'})
     article = {}
     article['hoi'] = article_id
+    article['body'] = body_soup[0].get_text(strip=True)
     meta = article_soup.find('table').find('tbody').find_all('tr')
     try:
         article['title'] = meta[0].find('td').get_text(strip=True)
         article['p_date'] = meta[1].find('td').get_text(strip=True)
-        article['subtitle'] = meta[2].find('td').get_text(strip=True)
+        if len(meta) > 2 : article['subtitle'] = meta[2].find('td').get_text(strip=True)
         #if there's no author, meta[] ends with [3], otherwise, with[4]
-        meta_name = meta[3].find('th').get_text(strip=True)
-        if meta_name == '필자':
-            article['author'] = meta[3].find('td').get_text(strip=True)
-            article['a_type'] = meta[4].find('td').get_text(strip=True)
-        else:
-            article['author'] = ''
-            article['a_type'] = meta[3].find('td').get_text(strip=True)
+        if len(meta) > 3:
+            meta_name = meta[3].find('th').get_text(strip=True)
+            if meta_name == '필자':
+                article['author'] = meta[3].find('td').get_text(strip=True)
+                if len(meta)> 4: article['a_type'] = meta[4].find('td').get_text(strip=True)
+            else:
+                article['author'] = ''
+                article['a_type'] = meta[3].find('td').get_text(strip=True)
 
-        article['body'] = body_soup[0].get_text(strip=True)
         db[article_table].upsert(article, ['hoi'])
     except Exception as e:
         print(e)
@@ -164,8 +171,8 @@ if __name__ == "__main__":
         # http://db.history.go.kr/item/level.do?sort=levelId&dir=ASC&start=1&limit=20&page=1&pre_page=1&setId=-1&prevPage=0&prevLimit=&itemId=ma&types=&synonym=off&chinessChar=on&brokerPagingInfo=&levelId=ma_001&position=-1
        # http://db.history.go.kr/item/level.do?sort=levelId&dir=ASC&start=1&limit=20&page=1&pre_page=1&setId=-1&prevPage=0&prevLimit=&itemId=ma&types=&synonym=off&chinessChar=on&brokerPagingInfo=&levelId=ma_013&position=-1
         base_url = 'http://db.history.go.kr/id/'
-        #for i in range(1,2): #96):
-        for i in range(13,14):
+        #for i in range(1,96):
+        for i in range(31,32):
             top_id = format(i, '03d')
             try:
                 do_a_periodical('ma_%s' %top_id)
