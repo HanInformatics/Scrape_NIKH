@@ -13,3 +13,5 @@ There are a little bit dependencies.
 
 - scrape_periodicals.py: 한국근현대잡지자료 in 일제강점기
 - down-1.sh, down-2.sh,.. : 휴전회담회의록 in 대한민국
+- hanja2hangul: a program of convering hanja to hangul
+
